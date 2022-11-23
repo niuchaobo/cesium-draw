@@ -47,8 +47,19 @@ export default {
     })
     this.$refs.marker.init(viewer);
     tileset.readyPromise.then(t=>{
+        var height = 15;
+        height = Number(height);
+        if (isNaN(height)) {
+            return;
+        }
+        var cartographic = Cesium.Cartographic.fromCartesian(t.boundingSphere.center);
+        var surface = Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, cartographic.height);
+        var offset = Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude,height);
+        var translation = Cesium.Cartesian3.subtract(offset, surface, new Cesium.Cartesian3());
+        t.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+
       viewer.scene.primitives.add(t)
-      // viewer.camera.viewBoundingSphere(t.boundingSphere)
+       viewer.camera.viewBoundingSphere(t.boundingSphere)
     })
   },
   methods: {

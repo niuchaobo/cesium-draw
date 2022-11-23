@@ -553,6 +553,7 @@ class CesiumPolyline extends BaseGraphic {
    * 3.要素高亮显示
    */
   startEdit() {
+    console.log(1);
     if (!Cesium.defined(this.graphic)) {
       return;
     }
@@ -567,6 +568,7 @@ class CesiumPolyline extends BaseGraphic {
     this.graphic.polyline.positions = new Cesium.CallbackProperty(() => {
       return this.positions
     }, false)
+      console.log(this.node);
     if (this.node === false) {
       this.createNode()
     }
@@ -674,6 +676,7 @@ class CesiumPolygon extends BaseGraphic {
         hierarchy: new Cesium.CallbackProperty(function() {
           return new Cesium.PolygonHierarchy(self.positions)
         }, false),
+        extrudedHeight:100,
         ...options
       },
       properties: options.properties
@@ -836,6 +839,18 @@ class CesiumPolygon extends BaseGraphic {
    */
   startEdit() {
     const positions = this.positions
+     /* console.log(positions)
+      let arr = []
+      for(let p of this.positions){
+          let x = p['x'];
+          let y = p['y'];
+          let z = p['z']+100
+          let t  = new Cesium.Cartesian3(x,y,z);
+          arr.push(t);
+      }
+      this.positions.push.apply(this.positions,arr);
+       console.log(this.positions)*/
+
     // const nodePositions = this.nodePositions
     if (this.graphic instanceof Cesium.Entity) {
       this.graphic.polygon.hierarchy = new Cesium.CallbackProperty(function() {
@@ -1095,13 +1110,146 @@ class CesiumModel extends BaseGraphic {
     minimumPixelSize: 64
   }
 }
+
+class CesiumBox extends BaseGraphic {
+    constructor(viewer, options) {
+        super(viewer);
+        this._type = 'BOX';
+        this._gvtype = GraphicType.BOX;
+        this.position = options.position
+        // this.mname = '未命名'
+        this.options = {
+            mid: this._gvid,
+            mtype: this._gvtype,
+            position: this.position,
+            model: options
+        }
+        this.create()
+
+    }
+    create() {
+        let data = [
+            {
+                lon1: 112, lat1: 24,
+                lon2: 113, lat2: 24,
+                lon3: 113, lat3: 25,
+                lon4: 112, lat4: 25,
+            },
+            {
+                lon1: 114, lat1: 24,
+                lon2: 115, lat2: 24,
+                lon3: 115, lat3: 25,
+                lon4: 114, lat4: 25,
+            },
+            {
+                lon1: 118, lat1: 24,
+                lon2: 117, lat2: 24,
+                lon3: 117, lat3: 25,
+                lon4: 118, lat4: 25,
+            }
+        ];
+// 创建长方体对象
+        let that = this;
+        let geometryInstances = [];
+        data.map((item,index) => {
+            let instance = new Cesium.GeometryInstance({
+                id: `box_${index}`,
+                geometry: new Cesium.PolygonGeometry({
+                    polygonHierarchy: new Cesium.PolygonHierarchy(
+                        Cesium.Cartesian3.fromDegreesArray([
+                            item.lon1, item.lat1,
+                            item.lon2, item.lat2,
+                            item.lon3, item.lat3,
+                            item.lon4, item.lat4,
+                        ])
+                    ),
+                    extrudedHeight: that.getDistance(item.lon1, item.lat1, item.lon2, item.lat2),
+                }),
+            })
+            geometryInstances.push(instance);
+        })
+// 创建材质，在MaterialAppearance中若不添加基础材质，模型将会透明
+        let material = new Cesium.Material.fromType("Color");
+        material.uniforms.color =  Cesium.Color.RED;
+        // 自定义材质
+        let aper = new Cesium.MaterialAppearance({
+            material: material,
+            translucent: true,
+            closed: true,
+        })
+// 加载模型
+        that.viewer.scene.primitives.add(
+            new Cesium.Primitive({
+                geometryInstances: geometryInstances,
+                appearance: aper,
+                releaseGeometryInstances: false,
+                compressVertices: false,
+            })
+        )
+    }
+    startEdit() {
+        if (this.graphic) {
+            this.graphic.label.position = new Cesium.CallbackProperty(() => {
+                return this.position
+            }, false)
+        }
+    }
+    stopEdit() {
+        if (this.graphic) {
+            this.graphic.label.position = this.position
+        }
+    }
+    remove() {
+        if (this.viewer) {
+            this.viewer.entities.remove(this.graphic)
+            this.graphic = undefined
+        }
+    }
+    destroy() {
+        this.remove()
+        this.options = undefined
+        this.position = undefined
+    }
+    set uri(uri) {
+        if (this.graphic) {
+            this.graphic.model.uri = uri
+        }
+    }
+    set color(c) {
+        if (this.graphic) {
+            this.graphic.model.color = c
+        }
+    }
+    set mode(m) {
+        if (this.graphic) {
+            this.graphic.model.colorBlendMode = m
+        }
+    }
+    set mixed(v) {
+        if (this.graphic) {
+            this.graphic.model.colorBlendAmount = v
+        }
+    }
+    static defaultStyle = {
+        material: new Cesium.Color.fromCssColorString('rgba(247,224,32,0.5)'),
+        outline: true,
+        outlineColor: new Cesium.Color.fromCssColorString('rgba(255,247,145,1)'),
+        outlineWidth: 2,
+        perPositionHeight: false
+        // height:0,
+        // HeightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+        //material: new Cesium.ColorMaterialProperty(new Cesium.Color(205, 139, 14, 1)),
+
+    }
+}
 export {
   CesiumPoint,
   CesiumPolyline,
   CesiumPolygon,
   CesiumLabel,
   CesiumBillboard,
-  CesiumModel
+  CesiumModel,
+  CesiumBox
 }
 export default {
   CesiumPoint,
@@ -1109,5 +1257,6 @@ export default {
   CesiumPolygon,
   CesiumLabel,
   CesiumBillboard,
-  CesiumModel
+  CesiumModel,
+  CesiumBox
 }

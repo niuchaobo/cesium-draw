@@ -1,7 +1,8 @@
 import {
   CesiumPoint,
   CesiumPolyline,
-  CesiumPolygon
+  CesiumPolygon,
+  CesiumBox
 } from './Graphic'
 import utils from '@/js/utils'
 import {
@@ -212,9 +213,9 @@ class GraphicManager {
 
   /**
    *
-   * @param {Object} options 定义一个CesiumPolygon
+   * @param {Object} options
    */
-  createPolygon(options = CesiumPolygon.defaultStyle) {
+  createBox(options = CesiumBox.defaultStyle) {
     this.graphicType = GraphicType.POLYGON;
     const id = this.generateId();
     this.graphicId = id;
@@ -231,7 +232,7 @@ class GraphicManager {
     options.material = this.material || options.material;
     options.outlineWidth = this.style.outlineWidth || options.outlineWidth;
     options.outlineColor = this.style.outlineColor || options.outlineColor;
-    const manager = new CesiumPolygon(this.viewer, options);
+    const manager = new CesiumBox(this.viewer, options);
     manager.mid = id;
     // manager.id = id;
     // manager.mname = '未命名';
@@ -256,6 +257,50 @@ class GraphicManager {
     return manager;
 
   }
+
+    createPolygon(options = CesiumPolygon.defaultStyle) {
+        this.graphicType = GraphicType.POLYGON;
+        const id = this.generateId();
+        this.graphicId = id;
+        options.positions = this.positions;
+        if (/.*GROUND.*/.test(this._heightReference)) {
+            options.perPositionHeight = false
+            // options.heightReference = Cesium.HeightReference.CLAMP_TO_GROUND;
+        } else {
+            options.perPositionHeight = true;
+            // options.heightReference = Cesium.HeightReference.RELATIVE_TO_GROUND;
+            // options.height = 0
+        }
+
+        options.material = this.material || options.material;
+        options.outlineWidth = this.style.outlineWidth || options.outlineWidth;
+        options.outlineColor = this.style.outlineColor || options.outlineColor;
+        const manager = new CesiumPolygon(this.viewer, options);
+        manager.mid = id;
+        // manager.id = id;
+        // manager.mname = '未命名';
+        manager.heightReference = this.heightReference;
+        this.tip.visible = true;
+        this.tip.updateText('左键标绘，右键结束.');
+        this.manager.set(id, manager);
+        this.editManager = manager;
+        const evt = new CustomEvent('addEvent', {
+            detail: {
+                mid: manager.mid,
+                mtype: manager.mtype,
+                mname: manager.mname,
+            }
+        })
+        document.dispatchEvent(evt)
+        const self = this;
+        this.handler.setInputAction(e => {
+            self.tip && self.tip.updatePosition(e.endPosition);
+        }, MOUSE_MOVE)
+        this.addEventListener()
+        return manager;
+
+    }
+
   generateId() {
     return (Math.random() * 10000000).toString(16).substr(0, 4) + '-' + (new Date()).getTime() + '-' + Math.random().toString().substr(2, 5);
   }
@@ -264,7 +309,8 @@ class GraphicManager {
       pickedObj.id instanceof Cesium.Entity &&
       (pickedObj.id.mtype === GraphicType.POLYLINE ||
         pickedObj.id.mtype === GraphicType.POLYGON ||
-        pickedObj.id.mtype === GraphicType.POINT)) {
+        pickedObj.id.mtype === GraphicType.POINT ||
+          pickedObj.id.mtype === GraphicType.BOX)) {
       return true
     }
     return false

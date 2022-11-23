@@ -46,6 +46,18 @@
           </li>
           <li>
             <i
+                    class="iconfont icon-cube icon-class"
+                    title="添加立方体"
+                    :class="{'selected-graphic':menuSelected['BOX']}"
+                    @click="menuAction('BOX')"
+            ></i>
+            <span
+                    @click="menuAction('BOX')"
+                    :class="{'selected-graphic':menuSelected['BOX']}"
+            >立方体</span>
+          </li>
+          <li>
+            <i
               class="iconfont iconlabel icon-class"
               title="添加文字"
               :class="{'selected-graphic':menuSelected['LABEL']}"
@@ -68,15 +80,6 @@
               :class="{'selected-graphic':menuSelected['MODEL']}"
             >模型</span>
           </li>
-          <!-- <li>
-            <i
-              class="font-btn"
-              title="添加文字"
-              :class="{'font-selected':menuSelected['LABEL']}"
-              @click="menuAction('LABEL')"
-            ></i>
-            <span @click="menuAction('LABEL')">文字</span>
-          </li>-->
           <li>
             <i
               class="iconfont iconlayer icon-class"
@@ -329,7 +332,7 @@
     ></layerManager>
     <input
       type="file"
-      v-show="false"
+      v-show="true"
       @change="importfp"
       id="graphicuploadhandler"
       accept=".geojson, .shp"
@@ -461,7 +464,7 @@ export default {
   mounted() {
     const self = this;
     this.$nextTick(() => {
-      moveDiv("drawtoolPanel", "drawtoolHead");
+      //moveDiv("drawtoolPanel", "drawtoolHead");
       $("#drawtoolPanel .el-color-picker__icon").addClass("iconfont iconcolor");
     });
     if (this.viewer instanceof Cesium.Viewer) {
@@ -903,6 +906,26 @@ export default {
           } else {
             this.$refs.markerManager.cancelMark();
           }
+          case "BOX":
+              if(this.editMode){
+                  graphicManager.heightReference = this.graphicHeight;
+                  const option = CesiumPolygon.defaultStyle;
+                  option.outline = this.outline;
+                  option.outlineColor = Cesium.Color.fromCssColorString(
+                      this.outlineColor
+                  );
+                  option.outlineWidth = parseInt(this.outlineWidth);
+                  // option.color = Cesium.Color.fromCssColorString(this.polygonColor);
+                  graphicManager.material = Cesium.Color.fromCssColorString(
+                      this.polygonColor
+                  );
+                  graphicManager.style = option;
+                  graphicManager.createBox();
+              }else{
+                  graphicManager.destroyManager();
+              }
+              break;
+
       }
     },
     setLineMaterial(material, color) {
@@ -1060,7 +1083,8 @@ export default {
 <style lang="scss" scoped>
 #drawtoolPanel {
   position: fixed;
-  width: $draw-panel-width;
+  //width: $draw-panel-width;
+    //width: 100%;
   top: 10px;
   right: 10px;
   height: 85px;
@@ -1095,7 +1119,7 @@ export default {
   content: "\E6DB";
 }
 .el-container {
-  width: 400px;
+  //width: 600px;
   height: 85px;
   color: $color;
   background: $bg-color;

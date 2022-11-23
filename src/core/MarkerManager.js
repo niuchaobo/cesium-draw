@@ -215,6 +215,7 @@ export default class MarkerManager {
       this._viewer, {
         ...this.markerOptions,
         position: cartesian,
+        disableDepthTestDistance:Number.POSITIVE_INFINITY ,
         image: this.selectedImage
       },
       mp

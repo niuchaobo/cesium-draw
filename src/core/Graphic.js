@@ -791,7 +791,7 @@ class CesiumPolygon extends BaseGraphic {
     //Not create outline here.
     //Create it with createOutline if necessary
 
-    this.options.polygon.outline = false;
+    //this.options.polygon.outline = false;
     if (this.viewer) {
       this.graphic = this.viewer.entities.add(this.options);
       // this.graphic.mtype = 'CesiumPolygon';

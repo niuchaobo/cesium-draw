@@ -137,7 +137,7 @@ export default {
               console.log('经纬度是：', { x: lon, y: lat });
           }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
-      //this.single()
+      this.single()
       this.classification();
       this.handlerMouseMove();
   },
@@ -195,31 +195,26 @@ export default {
               Cesium.Cartesian3.fromDegrees(-75.59684814944326,40.03864129251899),
               Cesium.Cartesian3.fromDegrees(-75.59612366532117,40.03891619184536)
           ];
-
-          var pointsLength = points.length;
-          var clippingPlanes = []; // 存储ClippingPlane集合
-          for (var i = 0; i < pointsLength; ++i) {
-              var nextIndex = (i + 1) % pointsLength;
-              var midpoint = Cesium.Cartesian3.add(points[i], points[nextIndex], new Cesium.Cartesian3());
-              midpoint = Cesium.Cartesian3.multiplyByScalar(midpoint, 0.5, midpoint);
-
-              var up = Cesium.Cartesian3.normalize(midpoint, new Cesium.Cartesian3());
-              var right = Cesium.Cartesian3.subtract(points[nextIndex], midpoint, new Cesium.Cartesian3());
-              right = Cesium.Cartesian3.normalize(right, right);
-
-              var normal = Cesium.Cartesian3.cross(right, up, new Cesium.Cartesian3());
-              normal = Cesium.Cartesian3.normalize(normal, normal);
-
-              var originCenteredPlane = new Cesium.Plane(normal, 0.0);
-              var distance = Cesium.Plane.getPointDistance(originCenteredPlane, midpoint);
-
-              clippingPlanes.push(new Cesium.ClippingPlane(normal, distance));
-          }
-          window.cesiumViewer.scene.globe.clippingPlanes = new Cesium.ClippingPlaneCollection({
-              planes:clippingPlanes,
-              edgeWidth: 4.0,
-              edgeColor: Cesium.Color.YELLOW
+          // 绘制多边柱体
+          let graphical = window.cesiumViewer.entities.add({
+              polygon: {
+                  hierarchy: new Cesium.PolygonHierarchy(
+                      Cesium.Cartesian3.fromDegreesArray([-75.59704652603575,40.03892589028592,
+                          -75.59632568159155,40.039231403008884,
+                          -75.59684814944326,40.03864129251899,
+                          -75.59612366532117,40.03891619184536
+                      ])
+                  ),
+                  height: 100,
+                  extrudedHeight: 70.0,
+                  outline: true,
+                  outlineColor: Cesium.Color.WHITE,
+                  outlineWidth: 40,
+                  //material: Cesium.Color.fromRandom({ alpha: 1.0 }),
+              },
           });
+
+
 
 
       },

@@ -275,6 +275,7 @@ class GraphicManager {
         options.material = this.material || options.material;
         options.outlineWidth = this.style.outlineWidth || options.outlineWidth;
         options.outlineColor = this.style.outlineColor || options.outlineColor;
+        options.outlineColor = Cesium.Color.WHITE
         const manager = new CesiumPolygon(this.viewer, options);
         manager.mid = id;
         // manager.id = id;

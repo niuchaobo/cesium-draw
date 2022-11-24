@@ -882,6 +882,7 @@ export default {
               this.polygonColor
             );
             graphicManager.style = option;
+              console.log(option);
             graphicManager.createPolygon();
           } else {
             graphicManager.destroyManager();

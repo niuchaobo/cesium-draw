@@ -474,6 +474,7 @@ export default class MarkerManager {
 
     for (let m of managers) {
       if (m.type === type) {
+        console.log(m)
         json.features.push(m.toGeoJson());
       }
     }

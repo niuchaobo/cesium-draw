@@ -3,7 +3,7 @@ const GraphicType = (function() {
 
   }
   _.MARKER = 0
-  _.POINT = 5
+  _.POINT = 6
   _.POLYLINE = 1
   _.POLYGON = 2
   _.LABEL = 3

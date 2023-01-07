@@ -139,7 +139,7 @@ export default {
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
       this.single()
       this.classification();
-      this.handlerMouseMove();
+      //this.handlerMouseMove();
   },
   methods: {
       single(){

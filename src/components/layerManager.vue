@@ -21,7 +21,8 @@
           <el-dropdown-item command="MARKER" class="iconfont iconmarker">标记</el-dropdown-item>
           <el-dropdown-item command="POLYLINE" class="iconfont iconpolyline">线</el-dropdown-item>
           <el-dropdown-item command="POLYGON" class="iconfont iconpolygon">多边形</el-dropdown-item>
-          <el-dropdown-item command="LABEL" class="iconfont iconlabel">书签</el-dropdown-item>
+          <el-dropdown-item command="LABEL" class="iconfont iconlabel">文字</el-dropdown-item>
+          <el-dropdown-item command="BOX" class="miconfont icon-cube">立方体</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <i class="iconfont iconremove action-icon-last-class" @click="removeAll">
@@ -103,7 +104,15 @@ export default {
           text: "模型",
           type: "model",
           children: []
+        },
+        {
+            id: "box",
+            text: "立方体",
+            type: "box",
+            icon: "miconfont icon-cube",
+            children: []
         }
+
       ],
       defaultTools: {
         locate: { text: "定位", icon: "iconlocate", action: this.locate },
@@ -217,7 +226,7 @@ export default {
 </script>
 <style lang='scss' scoped>
 .layer-manager-box {
-  width: $draw-panel-width;
+  width: 465px;
   background-color: $bg-color;
   color: $color;
   height: 400px;

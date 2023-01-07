@@ -5,7 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 function resolve(dir) {
   return path.join(__dirname, dir);
 }
-const theme = 'default'
+const theme = 'dark'
 module.exports = {
   outputDir: "dist",
   configureWebpack: {

@@ -999,7 +999,8 @@
                             graphicManager.material = Cesium.Color.fromCssColorString(
                                 this.polygonColor
                             );
-                            option.mcolor = this.polygonColor
+                            option.materialColorRgba = this.polygonColor
+                            option.outlineColorRgba = this.outlineColor
                             console.log(graphicManager.material)
                             graphicManager.style = option;
                             graphicManager.createBox();
@@ -1120,7 +1121,6 @@
                 }
                 const color = Cesium.Color.fromCssColorString(n);
                 graphicManager.material = color;
-               // graphicManager.style.mcolor = n;
                 this.syncColor("polygonColor", n);
             },
             boxHeight(h) {

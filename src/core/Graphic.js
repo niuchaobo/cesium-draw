@@ -422,9 +422,6 @@ class CesiumPoint extends BaseGraphic {
             return this.graphic === node
         } else if (this.graphic instanceof Array) {
             const count = this.graphic.length
-            console.log("count="+count);
-            console.log(node)
-            console.log(this.graphic)
             for (let i = 0; i < count; i++) {
                 if (this.graphic[i] === node) {
                     return i
@@ -525,6 +522,7 @@ class CesiumPolyline extends BaseGraphic {
         this._type = 'POLYLINE';
         this.mtype = GraphicType.POLYLINE;
         this.positions = options.positions || [];
+        console.log(this.positions)
         const self = this;
         const _update = function () {
             return self.positions;
@@ -853,6 +851,10 @@ class CesiumPolygon extends BaseGraphic {
         }
         this.positions[index] = node
         if (index === 0) {
+            if(this.positions.length == this.nodePositions.length){ //兼容导入时的情况
+                let tmp = this.nodePositions[0]
+                this.nodePositions.push(tmp)
+            }
             this.nodePositions[0] = node
             this.nodePositions[this.nodePositions.length - 1] = node
         } else {
@@ -918,6 +920,10 @@ class CesiumPolygon extends BaseGraphic {
         // options.show=this.options.outline
         options.clampToGround = !this.graphic.polygon.perPositionHeight.getValue(this.viewer.clock.currentTime);
         options.positions = this.nodePositions;
+        if(this.options.polygon.importFlag){
+            let last = options.positions[0]
+            options.positions.push(last);
+        }
         this.outlineGraphic = new CesiumPolyline(this.viewer, options);
         this.outline = true
     }
@@ -1044,6 +1050,21 @@ class CesiumPolygon extends BaseGraphic {
         const options = CesiumPolygon.defaultStyle;
         options.positions = positions;
         options.properties = properties
+        options.importFlag = true;
+        //options.properties = properties
+        for(let p in properties){
+            if(p=='material' || p=='outlineColor'){
+                let color = properties[p]
+                let r = color.red * 255;
+                let b = color.blue * 255;
+                let g = color.green * 255;
+                let a = color.alpha;
+                let rgba = 'rgba('+r+','+g+','+b+','+a+')';
+                options[p] = new Cesium.Color.fromCssColorString(rgba);
+            }else{
+                options[p] =  properties[p]
+            }
+        }
         const pg = new CesiumPolygon(viewer, options);
         pg.stopEdit()
         return pg
@@ -1244,6 +1265,7 @@ class CesiumBox extends BaseGraphic {
         this._type = 'BOX';
         this.mtype = GraphicType.BOX;
         this.positions = options.positions || [];
+        console.log(this.positions)
         this.nodePositions = [...this.positions]
         this.topNode = [];
         this.topNodeFlag = false;
@@ -1259,7 +1281,6 @@ class CesiumBox extends BaseGraphic {
             },
             properties: options.properties
         };
-        console.log(this.options)
         delete options.properties
         this.node = false;
         this.graphic = undefined;
@@ -1385,7 +1406,7 @@ class CesiumBox extends BaseGraphic {
             let lng = Cesium.Math.toDegrees(cartographic.longitude);
             let height = this.options.polygon.extrudedHeight;
             if (this.direction >= 0) {
-                let h = cartographic.height * 0.03
+                let h = cartographic.height * 0.03 //变化速度
                 height = height - h
             } else {
                 let h = cartographic.height * 0.03
@@ -1408,7 +1429,7 @@ class CesiumBox extends BaseGraphic {
         }
     }
 
-    popNode() {
+     popNode() {
         this.positions.pop()
         //nodePositions的最后一个节点是倒数第2个点
         this.nodePositions.splice(this.nodePositions.length - 2)
@@ -1465,6 +1486,10 @@ class CesiumBox extends BaseGraphic {
         // options.show=this.options.outline
         options.clampToGround = !this.graphic.polygon.perPositionHeight.getValue(this.viewer.clock.currentTime);
         options.positions = this.nodePositions;
+        if(this.options.polygon.importFlag){// 当图形是导入时，需要通过增加顶点（画正方形需要5个点）处理边框
+            let last = options.positions[0]
+            options.positions.push(last);
+        }
         this.outlineGraphic = new CesiumPolyline(this.viewer, options);
         this.outline = true
     }
@@ -1610,17 +1635,23 @@ class CesiumBox extends BaseGraphic {
         positions = positions.map(_ => {
             return Cesium.Cartesian3.fromDegrees(_.lon, _.lat, _.height);
         });
-        const options = CesiumPolygon.defaultStyle;
+        const options = CesiumBox.defaultStyle;
+        options.importFlag = true;
         options.positions = positions;
         //options.properties = properties
         for(let p in properties){
-            if(p=='material'){
-                options[p] = new Cesium.Color.fromCssColorString(properties['mcolor']);
+            if(p=='material' || p=='outlineColor'){
+                let color = properties[p]
+                let r = color.red * 255;
+                let b = color.blue * 255;
+                let g = color.green * 255;
+                let a = color.alpha;
+                let rgba = 'rgba('+r+','+g+','+b+','+a+')';
+                options[p] = new Cesium.Color.fromCssColorString(rgba);
             }else{
                 options[p] =  properties[p]
             }
         }
-        console.log(options)
         const pg = new CesiumBox(viewer, options);
         pg.stopEdit()
         return pg

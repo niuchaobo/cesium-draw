@@ -240,7 +240,6 @@ class GraphicManager {
      * @param {Object} options
      */
     createBox(options = CesiumBox.defaultStyle) {
-        console.log(options)
         this.graphicType = GraphicType.BOX;
         const id = this.generateId();
         this.graphicId = id;
@@ -510,6 +509,7 @@ class GraphicManager {
                     self.manager.get(self.graphicId).addNode(cartesian);
                 }
             } else if (self.mode == 'edit' && self.dragging) {
+                console.log(self.selectedNodeIndex)
                 if (self.selectedNodeIndex !== -1) {
                     self.editManager.selectNodeType = self.selectNodeType
                     self.editManager.updateNode(self.selectedNodeIndex, cartesian)
